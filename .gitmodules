@@ -1,0 +1,6 @@
+[submodule "lib/alchemy-sdk"]
+	path = lib/alchemy-sdk
+	url = https://github.com/hermetic-modular/alchemy-sdk.git
+[submodule "lib/libDaisy"]
+	path = lib/libDaisy
+	url = https://github.com/electro-smith/libDaisy.git
