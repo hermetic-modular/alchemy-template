@@ -1,6 +1,9 @@
 /**
  * stereo_eq_palette.h — Per-band LED palettes for the dual-page EQ.
  *
+ * You don't need to implement something like this - this is simply to keep
+ * colors organized and out of the main flow of the main file.
+ *
  * Left = cool blues/greens. Right = warm oranges/reds/magentas. Each band
  * has four colors: bipolar level (positive, negative, center) plus a single
  * tone for the freq knob's level ring.

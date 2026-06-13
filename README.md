@@ -31,8 +31,6 @@ make it yours.
 - `arm-none-eabi-gcc`
 - `dfu-util`
 
-No CMake or Ninja needed — this template uses the plain Daisy Make build.
-
 Ubuntu / Debian:
 
 ```sh
@@ -56,50 +54,18 @@ make libdaisy    # build libDaisy once after cloning
 make             # build the firmware → build/stereo_eq.bin
 ```
 
-<details>
-<summary>Smaller download (optional)</summary>
-
-`--recurse-submodules` also pulls the Alchemy SDK's own nested copy of
-libDaisy, which this template doesn't use.  To skip it:
-
-```sh
-git clone https://github.com/hermetic-modular/alchemy-template.git my-module
-cd my-module
-git submodule update --init lib/alchemy-sdk
-git submodule update --init --recursive lib/libDaisy
-```
-
-</details>
-
-## Board versions
-
-The Alchemy Lab exists in two hardware revisions.  Firmware written against
-the unified `alchemy::AlchemyLab` board class (as `src/stereo_eq.cpp` is)
-builds for either — pick at build time:
-
-```sh
-make             # V2 board (current hardware, the default)
-make BOARD=v1    # V1 board
-```
-
-Switching `BOARD` automatically rebuilds from scratch — the two board
-support packages intentionally share class and file names, so their objects
-must never mix in one build tree.
-
 ## Flashing
 
-Put the module in DFU mode: hold **BOOT**, tap **RESET**, release **BOOT**.
-The Daisy bootloader also gives you a short DFU window right after a
-reset — press **RESET** during the bootloader's "breathing" LED animation
-to extend it.  Then:
+The Alchemy Lab runs a custom bootloader (`DaisyBootloader-AlchemyLabV2`)
+that serves DFU over the front-panel USB-C port.  Connect that port, then put
+the module in update mode: during the ~2 s window after power-on — the LED
+rings spin a warm-white comet — press or hold **B3.**  The rings switch to a slow breathe, and the module stays in DFU mode until it's flashed or reset.  Then:
 
 ```sh
 make program-dfu
 ```
 
-This uploads `build/stereo_eq.bin` to QSPI flash at `0x90040000`, where the
-stock Daisy bootloader expects it (it copies the image to SRAM on boot and
-runs it from there).
+You can also use the [Hermetic Modular Web Programmer](https://hermeticmodular.com/program) straight from the browser.
 
 ## Make it yours
 
@@ -129,29 +95,6 @@ git add lib/alchemy-sdk && git commit -m "Bump alchemy-sdk"
 The pinned libDaisy commit matches the one the Alchemy SDK itself vendors
 and tests against; if you bump one, consider bumping the other to match.
 
-## How the build hangs together
-
-The [`Makefile`](Makefile) is a normal Daisy project Makefile — it sets
-`CPP_SOURCES`, includes `lib/libDaisy/core/Makefile`, and inherits all the
-standard targets (`all`, `clean`, `program-dfu`, …).  On top of that it:
-
-- compiles the Alchemy SDK straight from the submodule (the framework
-  sources plus the board support package selected by `BOARD`);
-- builds in `APP_TYPE = BOOT_SRAM` for the Daisy bootloader, using the
-  SDK's vendored linker script and supplementary linker fragments;
-- sets `-std=gnu++17`, which the SDK requires.
-
-### Linker warnings you can ignore
-
-Recent binutils (≥ 2.45, bundled with current Arm GNU toolchains) changed
-how `INSERT` linker-script fragments resolve, so the fragment is passed
-before the primary script and the link emits a benign pair of warnings
-about the `RAM_D2` memory region (referenced in one script, declared in
-the other).  The layout is correct — the SDK's `.ahb_sram_bss` section
-lands at the base of RAM_D2 with the heap after it; check with
-`arm-none-eabi-readelf -S build/stereo_eq.elf` if you're curious.  A
-`LOAD segment with RWX permissions` warning is likewise expected for
-bare-metal Daisy images on new toolchains.
 
 ## License
 
