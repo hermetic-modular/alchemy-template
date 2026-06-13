@@ -1,5 +1,5 @@
 /**
- * stereo_eq.cpp — Alchemy Lab V1 dual mono three-band EQ.
+ * stereo_eq.cpp — Alchemy Lab dual mono three-band EQ.
  * Demonstrates a large surface of the SDK.
  *
  * Pure DSP in *_dsp files implements:
