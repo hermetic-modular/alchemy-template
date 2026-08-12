@@ -67,6 +67,18 @@ make program-dfu
 
 You can also use the [Hermetic Modular Web Programmer](https://hermeticmodular.com/program) straight from the browser.
 
+### Flashing without reboot
+
+Once the firmware is running, you can skip the DFU button dance entirely,
+`program-live` asks the running module to reboot itself into the bootloader
+over USB, waits for it to enumerate, and flashes in one step:
+
+    make program-live
+
+Requires `node` and `dfu-util` ≥ 0.11 on your PATH. (This works because the
+template firmware speaks HostLink, the same integration that powers the
+web editor.)
+
 ## Make it yours
 
 1. **Rename the firmware** — change `TARGET` at the top of the
