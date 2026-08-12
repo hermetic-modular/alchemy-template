@@ -16,10 +16,12 @@
  * - LED ring per pot displaying summed value.
  * - Save and recall presets with flash wear leveling.
  * - Settings menu for managing basics
+ * - HostLink: the /program web editor and `make program-live`, one line each
  */
 
 #include "daisy_seed.h"
 #include "alchemy/hw/alchemy_lab.h"
+#include "alchemy/host_link/host.h"
 #include "alchemy/surface/control_loop.h"
 #include "alchemy/surface/cv_matrix.h"
 #include "alchemy/surface/page.h"
@@ -41,65 +43,65 @@ static constexpr float kGainMaxDb = 24.f;
 
 /* Page 1 */
 
-static VirtualKnob l_hi_level = VirtualKnob(0, "Hi Level")
+static VirtualKnob l_hi_level = VirtualKnob(kPotTopLeft, "Hi Level")
     .Linear(-kGainMaxDb, +kGainMaxDb)
     .Ring(Bipolar(kLeftPalette.hi.level_pos,
                   kLeftPalette.hi.level_neg,
                   kLeftPalette.hi.level_center));
 
-static VirtualKnob l_hi_freq = VirtualKnob(1, "Hi Freq")
+static VirtualKnob l_hi_freq = VirtualKnob(kPotTopRight, "Hi Freq")
     .Exp(1000.f, 16000.f)
     .Ring(Level(kLeftPalette.hi.freq, FillAnim::Pulse));
 
-static VirtualKnob l_mid_level = VirtualKnob(2, "Mid Level")
+static VirtualKnob l_mid_level = VirtualKnob(kPotMiddleLeft, "Mid Level")
     .Linear(-kGainMaxDb, +kGainMaxDb)
     .Ring(Bipolar(kLeftPalette.mid.level_pos,
                   kLeftPalette.mid.level_neg,
                   kLeftPalette.mid.level_center));
 
-static VirtualKnob l_mid_freq = VirtualKnob(3, "Mid Freq")
+static VirtualKnob l_mid_freq = VirtualKnob(kPotMiddleRight, "Mid Freq")
     .Exp(200.f, 5000.f)
     .Ring(Level(kLeftPalette.mid.freq, FillAnim::Ripple));
 
-static VirtualKnob l_lo_level = VirtualKnob(4, "Lo Level")
+static VirtualKnob l_lo_level = VirtualKnob(kPotBottomLeft, "Lo Level")
     .Linear(-kGainMaxDb, +kGainMaxDb)
     .Ring(Bipolar(kLeftPalette.lo.level_pos,
                   kLeftPalette.lo.level_neg,
                   kLeftPalette.lo.level_center));
 
-static VirtualKnob l_lo_freq = VirtualKnob(5, "Lo Freq")
+static VirtualKnob l_lo_freq = VirtualKnob(kPotBottomRight, "Lo Freq")
     .Exp(60.f, 600.f)
     .Ring(Level(kLeftPalette.lo.freq, FillAnim::Pulse));
 
 
 /* Page 2 */
-static VirtualKnob r_hi_level = VirtualKnob(0, "Hi Level")
+static VirtualKnob r_hi_level = VirtualKnob(kPotTopLeft, "Hi Level")
     .Linear(-kGainMaxDb, +kGainMaxDb)
     .Ring(Bipolar(kRightPalette.hi.level_pos,
                   kRightPalette.hi.level_neg,
                   kRightPalette.hi.level_center));
 
-static VirtualKnob r_hi_freq = VirtualKnob(1, "Hi Freq")
+static VirtualKnob r_hi_freq = VirtualKnob(kPotTopRight, "Hi Freq")
     .Exp(1000.f, 16000.f)
     .Ring(Level(kRightPalette.hi.freq, FillAnim::Pulse));
 
-static VirtualKnob r_mid_level = VirtualKnob(2, "Mid Level")
+static VirtualKnob r_mid_level = VirtualKnob(kPotMiddleLeft, "Mid Level")
     .Linear(-kGainMaxDb, +kGainMaxDb)
     .Ring(Bipolar(kRightPalette.mid.level_pos,
                   kRightPalette.mid.level_neg,
                   kRightPalette.mid.level_center));
 
-static VirtualKnob r_mid_freq = VirtualKnob(3, "Mid Freq")
+static VirtualKnob r_mid_freq = VirtualKnob(kPotMiddleRight, "Mid Freq")
     .Exp(200.f, 5000.f)
     .Ring(Level(kRightPalette.mid.freq, FillAnim::Ripple));
 
-static VirtualKnob r_lo_level = VirtualKnob(4, "Lo Level")
+static VirtualKnob r_lo_level = VirtualKnob(kPotBottomLeft, "Lo Level")
     .Linear(-kGainMaxDb, +kGainMaxDb)
     .Ring(Bipolar(kRightPalette.lo.level_pos,
                   kRightPalette.lo.level_neg,
                   kRightPalette.lo.level_center));
 
-static VirtualKnob r_lo_freq = VirtualKnob(5, "Lo Freq")
+static VirtualKnob r_lo_freq = VirtualKnob(kPotBottomRight, "Lo Freq")
     .Exp(60.f, 600.f)
     .Ring(Level(kRightPalette.lo.freq, FillAnim::Pulse));
 
@@ -119,6 +121,13 @@ static ParamLock<2 * kNumPots>           locks   (hw.buttons[0], pager);
 static Presets                           presets (hw.seed.qspi);
 static Settings                          settings(hw, &pager);
 static CvMatrix                          cv_matrix(kNumCvInputs);
+
+/* HostLink: module identity once; transport, buffers, and reboot handling
+ * are SDK defaults.  This is what the /program web editor talks to — and
+ * what lets `make program-live` reboot the module for flashing. */
+static hostlink::Host                    host    (presets, "stereo_eq",
+                                                  "Stereo EQ", "0.1.0",
+                                                  "template");
 
 /* summed CV+knob values → DSP each frame */
 static constexpr float kMidQ      = 1.2f;
@@ -169,6 +178,7 @@ int main()
         .Use(locks)
         .Use(settings)
         .Use(cv_matrix)
+        .Use(host)
         .Use(left_page)
         .Use(right_page)
         .OnFrame(UpdateCoeffs);
