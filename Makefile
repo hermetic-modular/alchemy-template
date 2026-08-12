@@ -5,6 +5,7 @@
 #   make libdaisy       — build lib/libDaisy once after cloning
 #   make                — build firmware (BOARD=v2 by default)
 #   make program-dfu    — flash over USB (module in DFU mode first; see README)
+#   make program-live   — reboot the running module over USB and flash it
 #   make clean          — remove the build tree
 # =============================================================================
 
@@ -57,3 +58,14 @@ endif
 .PHONY: libdaisy
 libdaisy:
 	$(MAKE) -C $(LIBDAISY_DIR)
+
+# ── Flash without touching the module ───────────────────────────────────────
+# HostLink reboots the running module into the system bootloader over the
+# same USB connection the web editor uses, then dfu-util (-w waits for the
+# DFU device to enumerate) writes the app.
+USBPID ?= df11
+
+.PHONY: program-live
+program-live: all
+	node $(ALCHEMY_DIR)/tools/hostlink-cli/hostlink.mjs reboot bootloader
+	dfu-util -w -a 0 -s $(FLASH_ADDRESS):leave -D $(BUILD_DIR)/$(TARGET_BIN) -d ,0483:$(USBPID)
