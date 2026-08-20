@@ -18,6 +18,7 @@ make it yours.
 ├── src/                 the firmware — this is the part you edit
 │   ├── stereo_eq.cpp        hardware wiring, pages, knobs, CV, presets
 │   ├── stereo_eq_dsp.*      pure DSP (three-band biquad EQ per channel)
+│   ├── stereo_eq_manual.cpp firmware-authored interactive manual
 │   └── stereo_eq_palette.h  LED color palettes
 └── lib/
     ├── alchemy-sdk/     Alchemy framework + board support   (submodule)
