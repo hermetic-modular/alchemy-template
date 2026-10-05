@@ -37,6 +37,16 @@
 #include "stereo_eq_dsp.h"
 #include "stereo_eq_palette.h"
 
+/* Function-like macros to create a string literal from an object-like macro. */
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+/* Fallback build version identifier if one is not supplied to the compiler by
+ * Make. */
+#ifndef TARGET_GIT_VERSION
+#define TARGET_GIT_VERSION unknown
+#endif
+
 /* see stereo_eq_manual.cpp. */
 void DescribeManual(alchemy::hostlink::Host& host);
 
@@ -154,7 +164,7 @@ static CvMatrix                          cv_matrix(kNumCvInputs);
  * what lets `make program-live` reboot the module for flashing. */
 static hostlink::Host                    host    (presets, "stereo_eq",
                                                   "Stereo EQ", "0.1.0",
-                                                  "template");
+                                                  STR(TARGET_GIT_VERSION));
 
 /* summed CV+knob values → DSP each frame */
 static constexpr float kMidQ      = 1.2f;

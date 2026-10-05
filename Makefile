@@ -11,6 +11,12 @@
 
 TARGET = stereo_eq
 
+# Pass a build identifier to the C preprocessor for use with HostLink.
+TARGET_GIT_SHA := $(shell git rev-parse --short=7 HEAD)
+TARGET_GIT_DIRTY := $(shell git status --porcelain)
+TARGET_GIT_VERSION := $(TARGET_GIT_SHA)$(if $(TARGET_GIT_DIRTY),-dirty)
+C_DEFS += -DTARGET_GIT_VERSION=$(TARGET_GIT_VERSION)
+
 # Alchemy Lab board revision: v1 | v2
 BOARD ?= v2
 ifeq ($(filter $(BOARD),v1 v2),)
