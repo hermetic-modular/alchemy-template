@@ -9,7 +9,9 @@
 #   make clean          — remove the build tree
 # =============================================================================
 
-TARGET = stereo_eq
+# ── binary name - specify from the command-line with TARGET= (e.g. make TARGET=stereo_eq)
+# Or uncomment below and set the name if you are building only one firmware from this repository.
+# TARGET = stereo_eq
 
 # Alchemy Lab board revision: v1 | v2
 BOARD ?= v2
@@ -20,11 +22,8 @@ endif
 ALCHEMY_DIR  = lib/alchemy-sdk
 LIBDAISY_DIR = lib/libDaisy
 
-# ── App sources — yours to edit ─────────────────────────────────────────────
-CPP_SOURCES = \
-    src/stereo_eq.cpp \
-    src/stereo_eq_dsp.cpp \
-    src/stereo_eq_manual.cpp
+# ── App configuration - duplicate stereo_eq.mk and rename as a starting point
+include $(TARGET).mk
 
 # ── Alchemy SDK, compiled straight from the submodule ───────────────────────
 CPP_SOURCES += $(sort $(shell find $(ALCHEMY_DIR)/framework/src -name '*.cpp'))
