@@ -1,3 +1,10 @@
+# Optional parameter-lock demos: make DEMO=breathe [program-live|program-dfu].
+ifdef DEMO
+.PHONY: demo-forward $(MAKECMDGOALS)
+demo-forward $(MAKECMDGOALS):
+	@$(MAKE) -C demos/param_lock DEMO=$(DEMO) $(filter-out demo-forward,$@)
+.DEFAULT_GOAL := demo-forward
+else
 # =============================================================================
 # alchemy-template — Daisy-bootloader firmware for Hermetic Modular Alchemy Lab
 #
@@ -70,3 +77,5 @@ USBPID ?= df11
 program-live: all
 	node $(ALCHEMY_DIR)/tools/hostlink-cli/hostlink.mjs reboot bootloader
 	dfu-util -w -a 0 -s $(FLASH_ADDRESS):leave -D $(BUILD_DIR)/$(TARGET_BIN) -d ,0483:$(USBPID)
+
+endif
