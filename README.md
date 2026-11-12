@@ -109,16 +109,6 @@ The pinned libDaisy commit matches the one the Alchemy SDK itself vendors
 and tests against; if you bump one, consider bumping the other to match.
 
 
-## Parameter-lock demos
-
-The [parameter-lock demos](demos/param_lock/README.md) include five configurations
-of recording thresholds and LED styles. They output silence and build separately
-from `stereo_eq`:
-
-```sh
-make DEMO=breathe
-```
-
 ## License
 
 MIT — see [LICENSE](LICENSE).  libDaisy is independently MIT-licensed by
